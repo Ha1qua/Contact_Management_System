@@ -10,8 +10,7 @@ public class BackendApplication {
 		SpringApplication.run(BackendApplication.class, args);
 
 
-		System.out.println("USERNAME = " + System.getenv("DB_USERNAME"));
-		System.out.println("PASSWORD = " + System.getenv("DB_PASSWORD"));
+
 	}
 
 
