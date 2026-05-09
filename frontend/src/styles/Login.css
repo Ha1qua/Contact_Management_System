@@ -1,0 +1,42 @@
+.login-page {
+  position: relative;
+  overflow: hidden;
+}
+
+.login-page::before {
+  content: "";
+  position: absolute;
+  width: 280px;
+  height: 280px;
+  background: rgba(37, 99, 235, 0.12);
+  border-radius: 50%;
+  top: -90px;
+  right: -90px;
+}
+
+.login-page::after {
+  content: "";
+  position: absolute;
+  width: 240px;
+  height: 240px;
+  background: rgba(30, 64, 175, 0.1);
+  border-radius: 50%;
+  bottom: -70px;
+  left: -70px;
+}
+
+.forgot-password-link {
+  text-align: right;
+  margin-bottom: 18px;
+}
+
+.forgot-password-link a {
+  color: #2563eb;
+  font-size: 14px;
+  font-weight: 500;
+  transition: 0.3s;
+}
+
+.forgot-password-link a:hover {
+  color: #1e40af;
+}

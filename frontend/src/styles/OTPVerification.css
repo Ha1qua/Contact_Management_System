@@ -1,0 +1,31 @@
+.otp-page {
+  position: relative;
+}
+
+.otp-error {
+  color: #ef4444;
+  font-size: 14px;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.resend-container {
+  margin-top: 18px;
+  text-align: center;
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.resend-btn {
+  background: none;
+  border: none;
+  color: #2563eb;
+  font-weight: 600;
+  cursor: pointer;
+  margin-left: 6px;
+  transition: 0.3s;
+}
+
+.resend-btn:hover {
+  color: #1e40af;
+}
