@@ -24,7 +24,7 @@ public class User {
     private String email;
     @Column(name= "password", nullable = false)
     private String password;
-    @Column(name= "otp", nullable = false)
+    @Column(name= "otp")
     private String otp;
     @Column(name = "isVerified" , nullable = false)
     private boolean verified;
