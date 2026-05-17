@@ -5,7 +5,5 @@ import com.haiqua.backend.dto.UserRegistrationDto;
 
 public interface UserService {
 
-    UserDto registerUser(UserRegistrationDto registrationDto);
 
-    void verifyOtp(String email, String otp);
 }

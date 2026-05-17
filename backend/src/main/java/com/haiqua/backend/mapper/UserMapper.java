@@ -17,7 +17,6 @@ public class UserMapper {
     public static User mapToUser(UserRegistrationDto regDto){
         User user = new User();
         user.setEmail(regDto.getEmail());
-        user.setPassword(regDto.getPassword());
         user.setVerified(false);
         return user;
     }
