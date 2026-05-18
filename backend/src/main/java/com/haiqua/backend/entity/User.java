@@ -31,5 +31,7 @@ public class User {
     @Column(name = "otpExpiry")
     private LocalDateTime otpExpiry;
     @Column(name= "otpAttempts")
-    private int otpAttempts;
+    private int otpAttempts=0;
+    @Column(name = "otpType")
+    private String otpType = "RESET_PASSWORD";
 }

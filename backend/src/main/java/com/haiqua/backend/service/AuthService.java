@@ -12,4 +12,8 @@ public interface AuthService {
     void verifyOtp(String email, String otp);
 
     LoginResponseDto loginUser(LoginRequestDto loginRequestDto);
+
+    void resendOtp(String email);
+
+    void resetPassword(String email, String newPassword);
 }

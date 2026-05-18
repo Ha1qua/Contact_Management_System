@@ -7,11 +7,8 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@NoArgsConstructor
 @AllArgsConstructor
-
-public class VerfiyOtpDto {
-    private String email;
-    private String otp;
-
+@NoArgsConstructor
+public class ResendOtpRequest {
+    String email;
 }

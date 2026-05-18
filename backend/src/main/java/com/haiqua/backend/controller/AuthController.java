@@ -2,6 +2,7 @@ package com.haiqua.backend.controller;
 
 import com.haiqua.backend.dto.*;
 import com.haiqua.backend.service.AuthService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -17,38 +18,65 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/register")
-    public ResponseEntity<UserDto> register(@RequestBody UserRegistrationDto registrationDto) {
-
-        log.info("Register API called for email: {}", registrationDto.getEmail());
+    public ResponseEntity<ApiResponse<UserDto>> register(
+            @Valid @RequestBody UserRegistrationDto registrationDto
+    ) {
 
         UserDto registeredUser = authService.registerUser(registrationDto);
 
-        log.info("User registered successfully with email: {}", registeredUser.getEmail());
+        ApiResponse<UserDto> response =
+                new ApiResponse<>(
+                        true,
+                        "User registered successfully",
+                        registeredUser
+                );
 
-        return new ResponseEntity<>(registeredUser, HttpStatus.CREATED);
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     @PostMapping("/verify-otp")
-    public ResponseEntity<String> verifyOtp(@RequestBody VerfiyOtpDto verfiyOtpDto) {
+    public ResponseEntity<ApiResponse<Void>> verifyOtp(@RequestBody VerifyOtpDto verifyOtpDto) {
 
-        log.info("OTP verification request for email: {}", verfiyOtpDto.getEmail());
+        log.info("OTP verification request for email: {}", verifyOtpDto.getEmail());
 
-        authService.verifyOtp(verfiyOtpDto.getEmail(), verfiyOtpDto.getOtp());
+        authService.verifyOtp(verifyOtpDto.getEmail(), verifyOtpDto.getOtp());
 
-        log.info("OTP verified successfully for email: {}", verfiyOtpDto.getEmail());
+        log.info("OTP verified successfully for email: {}", verifyOtpDto.getEmail());
 
-        return ResponseEntity.ok("OTP Verified Successfully");
+        return ResponseEntity.ok(
+                new ApiResponse<>(true, "OTP verified successfully", null)
+        );
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponseDto> login(@RequestBody LoginRequestDto loginRequestDto) {
-
-        log.info("Login API called for email: {}", loginRequestDto.getEmail());
+    public ResponseEntity<ApiResponse<LoginResponseDto>> login(
+            @RequestBody LoginRequestDto loginRequestDto
+    ) {
 
         LoginResponseDto response = authService.loginUser(loginRequestDto);
 
-        log.info("Login successful for email: {}", loginRequestDto.getEmail());
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        true,
+                        "Login successful",
+                        response
+                )
+        );
     }
+
+    @PostMapping("/resend-otp")
+    public ResponseEntity<?> resendOtp(@RequestBody ResendOtpRequest request) {
+
+        authService.resendOtp(request.getEmail());
+        return ResponseEntity.ok("OTP resent successfully");
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody LoginRequestDto loginRequestDto) {
+
+        authService.resetPassword(loginRequestDto.getEmail(), loginRequestDto.getPassword());
+        return ResponseEntity.ok("Password reset successfully");
+    }
+
+
 }

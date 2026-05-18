@@ -1,16 +1,17 @@
 package com.haiqua.backend.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
-@Getter
-@Setter
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
+public class ApiResponse<T> {
 
-public class LoginResponseDto {
-
-    private  String token;
+    private boolean success;
+    private String message;
+    private T data;
 }
