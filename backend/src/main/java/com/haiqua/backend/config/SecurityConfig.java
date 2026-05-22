@@ -18,7 +18,8 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
-                                "/api/auth/**",   // ✅ allow OTP + auth APIs
+                                "/test/**",
+                                 "/api/auth/**",   // ✅ allow OTP + auth APIs
                                 "/api/users/**"
                         ).permitAll()
                         .anyRequest().authenticated()

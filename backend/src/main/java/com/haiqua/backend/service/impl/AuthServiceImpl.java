@@ -5,6 +5,7 @@ import com.haiqua.backend.dto.LoginResponseDto;
 import com.haiqua.backend.dto.UserDto;
 import com.haiqua.backend.dto.UserRegistrationDto;
 import com.haiqua.backend.entity.User;
+import com.haiqua.backend.exception.EmailAlreadyExistsException;
 import com.haiqua.backend.exception.InvalidCredentialsException;
 import com.haiqua.backend.exception.OtpException;
 import com.haiqua.backend.exception.UserNotFoundException;
@@ -37,7 +38,7 @@ public class AuthServiceImpl implements AuthService {
 
         logger.info("Register attempt for email: {}", registrationDto.getEmail());
         if(userRepository.existsByEmail(registrationDto.getEmail())) {
-            throw new RuntimeException("Email already exists");
+            throw new EmailAlreadyExistsException("Email already exists");
         }
 
         User user = UserMapper.mapToUser(registrationDto);
@@ -191,10 +192,10 @@ public class AuthServiceImpl implements AuthService {
     public void resetPassword(String email, String newPassword) {
 
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
 
         if (!"RESET_PASSWORD".equals(user.getOtpType())) {
-            throw new RuntimeException("OTP not verified for reset");
+            throw new OtpException("OTP not verified for reset");
         }
         user.setPassword(passwordEncoder.encode(newPassword));
 
