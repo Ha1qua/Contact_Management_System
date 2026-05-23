@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { registerUser } from "../services/authService";
 
 import Input from "../components/Input";
 import Button from "../components/Button";
@@ -47,16 +48,41 @@ const Register = () => {
 
     return Object.keys(newErrors).length === 0;
   };
-
-  const handleSubmit = (e) => {
+ const [loading, setLoading] = useState(false);
+const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (validateForm()) {
-      navigate("/verify-otp", {
-        state: {
-          flow: "register",
-        },
+    if (formData.password !== formData.confirmPassword) {
+      alert("wring pin")
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const response = await registerUser({
+        email: formData.email,
+        password: formData.password,
       });
+
+      console.log("REGISTER RESPONSE:", response);
+console.log("REGISTER RESPONSE DATA:", response.data);
+      if (response.data.success) {
+        
+
+        navigate("/verify-otp", {
+          state: {
+            email: formData.email,
+            flow: "register",
+          },
+        });
+      } else {
+        
+      }
+    } catch (err) {
+      
+    } finally {
+      setLoading(false);
     }
   };
 

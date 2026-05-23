@@ -1,5 +1,9 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../services/AuthContext";
+import { registerUser } from "../services/authService";
+import { loginUser } from "../services/authService";
+
 
 import Input from "../components/Input";
 import Button from "../components/Button";
@@ -9,6 +13,7 @@ import "../styles/Login.css";
 
 const Login = () => {
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const [formData, setFormData] = useState({
     email: "",
@@ -40,16 +45,26 @@ const Login = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+ const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    if (validateForm()) {
-      // Dummy Login
-      localStorage.setItem("isLoggedIn", "true");
+  if (validateForm()) {
+    try {
+      const res = await loginUser(formData);
 
-      navigate("/dashboard");
+      console.log("LOGIN RESPONSE:", res.data);
+
+      const token = res.data.data.token; // ✅ FIXED
+
+      login(token); // store in context/localStorage
+
+      navigate("/dashboard"); // ✅ NOW WILL WORK
+
+    } catch (error) {
+      console.log("ERROR:", error.response?.data);
     }
-  };
+  }
+};
 
   return (
     <div className="auth-container login-page">

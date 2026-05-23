@@ -12,7 +12,7 @@ const OTPInput = ({ otp, setOtp }) => {
     setOtp(updatedOtp);
 
     // Move next
-    if (value && index < 3) {
+    if (value && index < 5) {
       inputRefs.current[index + 1].focus();
     }
   };

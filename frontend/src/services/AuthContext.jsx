@@ -1,33 +1,28 @@
-import { createContext, useContext, useState } from 'react';
+
+import { createContext, useContext, useState } from "react";
 
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(() => {
-    const stored = localStorage.getItem('nexus_user');
-    return stored ? JSON.parse(stored) : null;
-  });
+  const [token, setToken] = useState(() => localStorage.getItem("token"));
+  const [user, setUser] = useState(null);
 
-  const login = (userData) => {
-    const user = { email: userData.email, name: userData.email.split('@')[0] };
-    localStorage.setItem('nexus_user', JSON.stringify(user));
-    setUser(user);
+  const login = (jwtToken) => {
+    localStorage.setItem("token", jwtToken);
+    setToken(jwtToken);
   };
 
   const logout = () => {
-    localStorage.removeItem('nexus_user');
+    localStorage.removeItem("token");
+    setToken(null);
     setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isAuthenticated: !!user }}>
+    <AuthContext.Provider value={{ token, user, login, logout, isAuthenticated: !!token }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-export const useAuth = () => {
-  const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error('useAuth must be used within AuthProvider');
-  return ctx;
-};
+export const useAuth = () => useContext(AuthContext);

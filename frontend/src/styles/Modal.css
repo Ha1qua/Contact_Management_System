@@ -1,0 +1,61 @@
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(2,6,23,0.7);
+  backdrop-filter: blur(8px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 200;
+}
+
+.modal-box,
+.delete-modal {
+  width: 460px;
+  background: rgba(15,23,42,0.96);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: white;
+  padding: 35px;
+  border-radius: 28px;
+  box-shadow: 0 25px 60px rgba(0,0,0,0.4);
+}
+
+.modal-box h2,
+.delete-modal h2 {
+  font-size: 32px;
+  margin-bottom: 12px;
+}
+
+.modal-box input {
+  width: 100%;
+  padding: 16px;
+  margin-top: 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.04);
+  color: white;
+  outline: none;
+}
+
+.modal-box input:focus {
+  border-color: #2dd4bf;
+  box-shadow: 0 0 0 4px rgba(45,212,191,0.12);
+  }
+
+.modal-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 14px;
+  margin-top: 28px;
+}
+
+.modal-buttons button {
+  padding: 14px 22px;
+  border-radius: 16px;
+  font-weight: 600;
+}
+
+.modal-buttons button:last-child {
+  background: linear-gradient(135deg, #2dd4bf, #c084fc);
+  color: white;
+}

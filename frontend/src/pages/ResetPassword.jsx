@@ -1,119 +1,69 @@
-import { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import FormCard from '../components/FormCard';
-import Input from '../components/Input';
-import Button from '../components/Button';
-import { resetPassword } from '../services/authService';
-import { validatePassword, validateConfirmPassword } from '../utils/validators';
-import '../styles/ResetPassword.css';
+import { useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { resetPassword } from "../services/authService";
+import "../styles/ResetPassword.css";
 
 const ResetPassword = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { email = '', otp = '' } = location.state || {};
 
-  const [form, setForm] = useState({ password: '', confirmPassword: '' });
-  const [errors, setErrors] = useState({});
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [serverError, setServerError] = useState('');
+  const { email } = location.state || {};
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
-    if (errors[name]) setErrors((prev) => ({ ...prev, [name]: '' }));
-    setServerError('');
-  };
-
-  const validate = () => {
-    const newErrors = {};
-    const passErr = validatePassword(form.password);
-    const confirmErr = validateConfirmPassword(form.password, form.confirmPassword);
-    if (passErr) newErrors.password = passErr;
-    if (confirmErr) newErrors.confirmPassword = confirmErr;
-    return newErrors;
-  };
+  const [form, setForm] = useState({
+    password: "",
+    confirmPassword: ""
+  });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const validation = validate();
-    if (Object.keys(validation).length > 0) {
-      setErrors(validation);
+
+    if (form.password !== form.confirmPassword) {
+      alert("Passwords do not match");
       return;
     }
-    setLoading(true);
+
     try {
-      const result = await resetPassword({ email, otp, password: form.password });
-      if (result.success) {
-        setSuccess(true);
-      } else {
-        setServerError(result.message || 'Failed to reset password.');
+      const res = await resetPassword({
+        email,
+        password: form.password
+      });
+
+      if (res.data || res.success) {
+        alert("Password reset successful");
+        navigate("/login");
       }
-    } catch {
-      setServerError('Something went wrong. Please try again.');
-    } finally {
-      setLoading(false);
+    } catch (err) {
+      console.log(err);
+      alert("Reset failed");
     }
   };
 
-  if (success) {
-    return (
-      <FormCard title="" subtitle="">
-        <div className="reset-success">
-          <div className="reset-success__icon">✓</div>
-          <h2 className="reset-success__title">Password reset!</h2>
-          <p className="reset-success__text">
-            Your password has been updated successfully.<br />
-            You can now sign in with your new password.
-          </p>
-          <Button onClick={() => navigate('/login')}>
-            Continue to Sign In
-          </Button>
-        </div>
-      </FormCard>
-    );
-  }
-
   return (
-    <FormCard
-      title="New password."
-      subtitle="Choose a strong password to secure your account."
-    >
-      <form onSubmit={handleSubmit} noValidate>
-        <Input
-          label="New Password"
+    <div className="reset-page">
+      <form onSubmit={handleSubmit}>
+        <h2>Reset Password</h2>
+
+        <input
           type="password"
-          name="password"
+          placeholder="New Password"
           value={form.password}
-          onChange={handleChange}
-          placeholder="Min. 8 characters"
-          error={errors.password}
-          autoComplete="new-password"
-          autoFocus
+          onChange={(e) =>
+            setForm({ ...form, password: e.target.value })
+          }
         />
 
-        <Input
-          label="Confirm New Password"
+        <input
           type="password"
-          name="confirmPassword"
+          placeholder="Confirm Password"
           value={form.confirmPassword}
-          onChange={handleChange}
-          placeholder="Repeat your password"
-          error={errors.confirmPassword}
-          autoComplete="new-password"
+          onChange={(e) =>
+            setForm({ ...form, confirmPassword: e.target.value })
+          }
         />
 
-        {serverError && (
-          <p className="error-text" style={{ marginBottom: '16px' }}>
-            {serverError}
-          </p>
-        )}
-
-        <Button type="submit" loading={loading} disabled={loading}>
-          {loading ? 'Updating…' : 'Reset Password'}
-        </Button>
+        <button type="submit">Reset Password</button>
       </form>
-    </FormCard>
+    </div>
   );
 };
 

@@ -1,73 +1,33 @@
-/**
- * authService.js
- * Placeholder authentication service functions.
- * Replace the simulated delays and responses with real API calls.
- */
+import axios from "axios";
 
-const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const BASE_URL = "http://localhost:8080/api/auth";
 
-/**
- * Register a new user.
- * @param {{ email: string, password: string }} data
- */
+// REGISTER
 export const registerUser = async (data) => {
-  await delay(800);
-  // TODO: replace with real API call
-  // const response = await fetch('/api/auth/register', {
-  //   method: 'POST',
-  //   headers: { 'Content-Type': 'application/json' },
-  //   body: JSON.stringify(data),
-  // });
-  // return response.json();
-  return { success: true, message: 'OTP sent to your email.' };
+  return axios.post(`${BASE_URL}/register`, data);
 };
 
-/**
- * Log in an existing user.
- * @param {{ email: string, password: string }} data
- */
+// LOGIN
 export const loginUser = async (data) => {
-  await delay(800);
-  // TODO: replace with real API call
-  if (!data.email || !data.password) {
-    return { success: false, message: 'Invalid credentials.' };
-  }
-  return { success: true, user: { email: data.email } };
+  return axios.post(`${BASE_URL}/login`, data);
 };
 
-/**
- * Verify a 4-digit OTP code.
- * @param {{ email: string, otp: string }} data
- */
-export const verifyOTP = async (data) => {
-  await delay(800);
-  // TODO: replace with real API call
-  // Simulate: accept any 4-digit code for demo purposes
-  if (data.otp.length !== 4) {
-    return { success: false, message: 'Invalid OTP. Please try again.' };
-  }
-  return { success: true, message: 'OTP verified successfully.' };
+// VERIFY OTP
+export const verifyOtp = async (data) => {
+  return axios.post(`${BASE_URL}/verify-otp`, data);
 };
 
-/**
- * Reset the user's password.
- * @param {{ email: string, otp: string, password: string }} data
- */
-export const resetPassword = async (data) => {
-  await delay(800);
-  // TODO: replace with real API call
-  if (!data.password) {
-    return { success: false, message: 'Password is required.' };
-  }
-  return { success: true, message: 'Password reset successfully.' };
+// RESEND OTP
+export const resendOtp = async (data) => {
+  return axios.post(`${BASE_URL}/resend-otp`, data);
 };
 
-/**
- * Send a forgot-password OTP to the given email.
- * @param {{ email: string }} data
- */
+// 🔥 FORGOT PASSWORD (SEND OTP)
 export const sendForgotPasswordOTP = async (data) => {
-  await delay(800);
-  // TODO: replace with real API call
-  return { success: true, message: 'Password reset OTP sent.' };
+  return axios.post(`${BASE_URL}/forgot-password`, data);
+};
+
+// 🔥 RESET PASSWORD (FINAL STEP)
+export const resetPassword = async (data) => {
+  return axios.post(`${BASE_URL}/reset-password`, data);
 };
