@@ -1,49 +1,28 @@
-import { useState } from "react";
-import "../styles/Pagination.css";
-
-const Pagination = () => {
-  const [currentPage, setCurrentPage] = useState(1);
-
-  const totalPages = 3;
-
-  const handlePrevious = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
-    }
-  };
-
-  const handleNext = () => {
-    if (currentPage < totalPages) {
-      setCurrentPage(currentPage + 1);
-    }
-  };
+const Pagination = ({ currentPage, setCurrentPage, totalPages }) => {
 
   return (
     <div className="pagination">
 
-      {/* Previous Button */}
       <button
-        onClick={handlePrevious}
-        disabled={currentPage === 1}
+        onClick={() => setCurrentPage(currentPage - 1)}
+        disabled={currentPage === 0}
       >
-        ← 
+        ←
       </button>
 
-      {/* Page Numbers */}
-      {[1, 2, 3].map((page) => (
+      {[...Array(totalPages)].map((_, i) => (
         <button
-          key={page}
-          onClick={() => setCurrentPage(page)}
-          className={currentPage === page ? "active-page" : ""}
+          key={i}
+          onClick={() => setCurrentPage(i)}
+          className={currentPage === i ? "active-page" : ""}
         >
-          {page}
+          {i + 1}
         </button>
       ))}
 
-      {/* Next Button */}
       <button
-        onClick={handleNext}
-        disabled={currentPage === totalPages}
+        onClick={() => setCurrentPage(currentPage + 1)}
+        disabled={currentPage === totalPages - 1}
       >
         →
       </button>

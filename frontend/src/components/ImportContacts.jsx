@@ -1,40 +1,21 @@
-import * as XLSX from "xlsx";
 
-const ImportContacts = ({ setContacts, contacts }) => {
+import { importContacts } from "../services/contactService";
 
-  const handleImport = (e) => {
+const ImportContacts = ({ refreshContacts }) => {
+
+  const handleImport = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    const reader = new FileReader();
+    try {
+      await importContacts(file);
 
-    reader.onload = (event) => {
+      refreshContacts(); // reload from DB
+      e.target.value = "";
 
-      const data = new Uint8Array(event.target.result);
-
-      const workbook = XLSX.read(data, {
-        type: "array",
-      });
-
-      const sheetName = workbook.SheetNames[0];
-
-      const worksheet = workbook.Sheets[sheetName];
-
-      const jsonData =
-        XLSX.utils.sheet_to_json(worksheet);
-
-      const newContacts = jsonData.map((item, index) => ({
-        id: Date.now() + index,
-        firstName: item.firstName || "",
-        lastName: item.lastName || "",
-        email: item.email || "",
-        phone: item.phone || "",
-      }));
-
-      setContacts((prev) => [...prev, ...newContacts]);
-    };
-
-    reader.readAsArrayBuffer(file);
+    } catch (error) {
+      console.log("Import error:", error.response?.data);
+    }
   };
 
   return (
@@ -43,7 +24,7 @@ const ImportContacts = ({ setContacts, contacts }) => {
 
       <input
         type="file"
-        accept=".xlsx,.xls,.csv"
+        accept=".csv"
         hidden
         onChange={handleImport}
       />

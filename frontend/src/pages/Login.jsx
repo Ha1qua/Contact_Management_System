@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../services/AuthContext";
-import { registerUser } from "../services/authService";
 import { loginUser } from "../services/authService";
 
+import { toast } from "react-toastify";
 
 import Input from "../components/Input";
 import Button from "../components/Button";
@@ -21,6 +21,7 @@ const Login = () => {
   });
 
   const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     setFormData({
@@ -42,36 +43,44 @@ const Login = () => {
 
     setErrors(newErrors);
 
-    return Object.keys(newErrors).length === 0;
+    if (Object.keys(newErrors).length > 0) {
+      toast.error("Please fix form errors");
+      return false;
+    }
+
+    return true;
   };
 
- const handleSubmit = async (e) => {
-  e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  if (validateForm()) {
+    if (!validateForm()) return;
+
+    setLoading(true);
+
     try {
       const res = await loginUser(formData);
 
-      console.log("LOGIN RESPONSE:", res.data);
+      const token = res.data.data.token;
 
-      const token = res.data.data.token; // ✅ FIXED
+      localStorage.setItem("token", token);
+      login(token);
 
-      login(token); // store in context/localStorage
+      toast.success("Login successful!");
 
-      navigate("/dashboard"); // ✅ NOW WILL WORK
-
+      navigate("/dashboard");
     } catch (error) {
-      console.log("ERROR:", error.response?.data);
+      toast.error(
+        error?.response?.data?.message || "Login failed. Try again."
+      );
+    } finally {
+      setLoading(false);
     }
-  }
-};
+  };
 
   return (
     <div className="auth-container login-page">
-      <FormCard
-        title="Welcome Back"
-        subtitle="Login to manage your contacts"
-      >
+      <FormCard title="Welcome Back" subtitle="Login to manage your contacts">
         <form onSubmit={handleSubmit}>
           <Input
             type="email"
@@ -95,7 +104,10 @@ const Login = () => {
             <Link to="/forgot-password">Forgot Password?</Link>
           </div>
 
-          <Button type="submit" text="Login" />
+          <Button
+            type="submit"
+            text={"Login"}
+          />
         </form>
 
         <div className="auth-footer">

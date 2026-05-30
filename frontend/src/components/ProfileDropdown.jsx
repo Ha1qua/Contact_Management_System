@@ -2,7 +2,8 @@ import { useNavigate } from "react-router-dom";
 import ChangePasswordModal from "./ChangePasswordModal";
 import { useState } from "react";
 
-const ProfileDropdown = () => {
+const ProfileDropdown = ({ profile }) => {
+
   const navigate = useNavigate();
   const [openPasswordModal, setOpenPasswordModal] = useState(false);
 
@@ -13,13 +14,17 @@ const ProfileDropdown = () => {
 
   return (
     <div className="profile-dropdown">
+
       <div className="profile-header">
-        <div className="large-avatar">HM</div>
+
+        <div className="large-avatar">
+          {profile?.initials}
+        </div>
 
         <div>
-          <h3>Haiqua Munir</h3>
-          <p>haiqua@gmail.com</p>
+          <p>{profile?.email}</p>
         </div>
+
       </div>
 
       <button onClick={() => setOpenPasswordModal(true)}>
@@ -34,7 +39,8 @@ const ProfileDropdown = () => {
         <ChangePasswordModal
           closeModal={() => setOpenPasswordModal(false)}
         />
-         )}
+      )}
+
     </div>
   );
 };

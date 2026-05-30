@@ -1,33 +1,41 @@
-import axios from "axios";
-
-const BASE_URL = "http://localhost:8080/api/auth";
+import api from "./api";
 
 // REGISTER
-export const registerUser = async (data) => {
-  return axios.post(`${BASE_URL}/register`, data);
+export const registerUser = (data) => {
+  return api.post("/auth/register", data);
 };
 
 // LOGIN
-export const loginUser = async (data) => {
-  return axios.post(`${BASE_URL}/login`, data);
+export const loginUser = (data) => {
+  return api.post("/auth/login", data);
 };
 
 // VERIFY OTP
-export const verifyOtp = async (data) => {
-  return axios.post(`${BASE_URL}/verify-otp`, data);
+export const verifyOtp = (data) => {
+  return api.post("/auth/verify-otp", data);
 };
 
 // RESEND OTP
-export const resendOtp = async (data) => {
-  return axios.post(`${BASE_URL}/resend-otp`, data);
+export const resendOtp = (data) => {
+  return api.post("/auth/resend-otp", data);
 };
 
-// 🔥 FORGOT PASSWORD (SEND OTP)
-export const sendForgotPasswordOTP = async (data) => {
-  return axios.post(`${BASE_URL}/forgot-password`, data);
+// FORGOT PASSWORD
+export const sendForgotPasswordOTP = (data) => {
+  return api.post("/auth/forgot-password", data);
 };
 
-// 🔥 RESET PASSWORD (FINAL STEP)
-export const resetPassword = async (data) => {
-  return axios.post(`${BASE_URL}/reset-password`, data);
+// RESET PASSWORD
+export const resetPassword = (data) => {
+  return api.post("/auth/reset-password", data);
+};
+
+// CHANGE PASSWORD
+export const changePassword = (data) => {
+  return api.post("/auth/change-password", data);
+};
+
+// GET PROFILE INFO
+export const getMyProfile = () => {
+  return api.get("/auth/me");
 };

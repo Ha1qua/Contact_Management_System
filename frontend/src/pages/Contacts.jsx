@@ -1,91 +1,136 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { importContacts } from "../services/contactService";
+import ImportContacts from "../components/ImportContacts";
+
 import SearchBar from "../components/SearchBar";
 import ContactCard from "../components/ContactCard";
 import Pagination from "../components/Pagination";
 import ContactModal from "../components/ContactModal";
 import DeleteModal from "../components/DeleteModal";
-import ImportContacts from "../components/ImportContacts";
+
+import {
+  getContacts,
+  deleteContact,
+  exportContacts,
+} from "../services/contactService";
 
 import "../styles/Contacts.css";
 
 const Contacts = () => {
 
-  const [contacts, setContacts] = useState([
-    {
-      id: 1,
-      firstName: "Amelia",
-      lastName: "Hart",
-      email: "amelia@gmail.com",
-      phone: "03123456789",
-    },
-    {
-      id: 2,
-      firstName: "Marcus",
-      lastName: "Okafor",
-      email: "marcus@gmail.com",
-      phone: "03211234567",
-    },
-  ]);
-
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [contacts, setContacts] = useState([]);
   const [search, setSearch] = useState("");
   const [openModal, setOpenModal] = useState(false);
   const [selectedContact, setSelectedContact] = useState(null);
   const [deleteModal, setDeleteModal] = useState(false);
 
+  // LOAD CONTACTS FROM BACKEND
+ useEffect(() => {
+  fetchContacts(currentPage);
+}, [currentPage]);
+
+  const fetchContacts = async (page = 0) => {
+  try {
+    const res = await getContacts(page, 5);
+
+    setContacts(res.data.data.content);   // Page content
+    setTotalPages(res.data.data.totalPages);
+
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+  // FILTER CONTACTS
   const filteredContacts = contacts.filter((contact) =>
     `${contact.firstName} ${contact.lastName}`
       .toLowerCase()
       .includes(search.toLowerCase())
   );
 
+  // DELETE CONTACT
+  const handleDelete = async (id) => {
+    try {
+      await deleteContact(id);
+      fetchContacts(); // refresh list
+    } catch (error) {
+      console.log("Delete error:", error.response?.data);
+    }
+  };
+
+  // EXPORT CONTACTS
+  const handleExport = async () => {
+    try {
+      const res = await exportContacts();
+
+      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const link = document.createElement("a");
+
+      link.href = url;
+      link.setAttribute("download", "contacts.csv");
+
+      document.body.appendChild(link);
+      link.click();
+    } catch (error) {
+      console.log("Export error:", error);
+    }
+  };
+
+  const handleImport = async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  try {
+    await importContacts(file);
+    fetchContacts(); // refresh after import
+  } catch (error) {
+    console.log("Import error:", error);
+  }
+};
+
   return (
     <div className="contacts-container">
 
       {/* HEADER */}
-     {/* HEADER */}
-<div className="contacts-header">
+      <div className="contacts-header">
 
-  <SearchBar
-    search={search}
-    setSearch={setSearch}
-  />
+        <SearchBar
+          search={search}
+          setSearch={setSearch}
+        />
 
-  <div className="header-actions">
+        <div className="header-actions">
 
-    <button
-      className="new-contact-btn"
-      onClick={() => {
-        // Export logic here later
-        console.log("Export Contacts");
-      }}
-    >
-      Export
-    </button>
+          <button
+            className="new-contact-btn"
+            onClick={handleExport}
+          >
+            Export
+          </button>
 
-    <button
-      className="new-contact-btn"
-      onClick={() => {
-        // Import logic here later
-        console.log("Import Contacts");
-      }}
-    >
-      Import
-    </button>
+          {/* <button
+            className="new-contact-btn"
+            onClick={() => console.log("Import will be added later")}
+          >
+            Import
+          </button> */}
+<ImportContacts refreshContacts={fetchContacts} />
+          
 
-    <button
-      className="new-contact-btn"
-      onClick={() => {
-        setSelectedContact(null);
-        setOpenModal(true);
-      }}
-    >
-       New Contact
-    </button>
+          <button
+            className="new-contact-btn"
+            onClick={() => {
+              setSelectedContact(null);
+              setOpenModal(true);
+            }}
+          >
+            New Contact
+          </button>
 
-  </div>
-
-</div>
-
+        </div>
+      </div>
 
       {/* CONTACT LIST */}
       <div className="contacts-list">
@@ -98,21 +143,25 @@ const Contacts = () => {
               setOpenModal(true);
             }}
             onDelete={() => {
-              setSelectedContact(contact);
-              setDeleteModal(true);
+              handleDelete(contact.id);
             }}
           />
         ))}
       </div>
 
-      {/* PAGINATION */}
-      <Pagination />
+      {/* PAGINATION (STATIC FOR NOW) */}
+      <Pagination
+      currentPage={currentPage}
+      setCurrentPage={setCurrentPage}
+      totalPages={totalPages}
+    />
 
       {/* MODALS */}
       {openModal && (
         <ContactModal
           closeModal={() => setOpenModal(false)}
           selectedContact={selectedContact}
+          refreshContacts={fetchContacts}
         />
       )}
 

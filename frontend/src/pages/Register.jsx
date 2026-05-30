@@ -6,6 +6,7 @@ import Input from "../components/Input";
 import Button from "../components/Button";
 import FormCard from "../components/FormCard";
 
+import { toast } from "react-toastify";
 import "../styles/Register.css";
 
 const Register = () => {
@@ -18,6 +19,7 @@ const Register = () => {
   });
 
   const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     setFormData({
@@ -29,33 +31,32 @@ const Register = () => {
   const validateForm = () => {
     let newErrors = {};
 
-    // Email validation
     if (!formData.email.includes("@")) {
       newErrors.email = "Enter a valid email";
     }
 
-    // Password validation
     if (formData.password.length < 6) {
       newErrors.password = "Password must be at least 6 characters";
     }
 
-    // Confirm password
     if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = "Passwords do not match";
     }
 
     setErrors(newErrors);
 
-    return Object.keys(newErrors).length === 0;
+    if (Object.keys(newErrors).length > 0) {
+      toast.error("Please fix form errors");
+      return false;
+    }
+
+    return true;
   };
- const [loading, setLoading] = useState(false);
-const handleSubmit = async (e) => {
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (formData.password !== formData.confirmPassword) {
-      alert("wring pin")
-      return;
-    }
+    if (!validateForm()) return;
 
     setLoading(true);
 
@@ -65,10 +66,8 @@ const handleSubmit = async (e) => {
         password: formData.password,
       });
 
-      console.log("REGISTER RESPONSE:", response);
-console.log("REGISTER RESPONSE DATA:", response.data);
       if (response.data.success) {
-        
+        toast.success("Registration successful!");
 
         navigate("/verify-otp", {
           state: {
@@ -77,10 +76,12 @@ console.log("REGISTER RESPONSE DATA:", response.data);
           },
         });
       } else {
-        
+        toast.error(response.data.message || "Registration failed");
       }
     } catch (err) {
-      
+      toast.error(
+        err?.response?.data?.message || "Server error. Please try again."
+      );
     } finally {
       setLoading(false);
     }

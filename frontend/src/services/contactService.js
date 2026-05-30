@@ -1,15 +1,39 @@
-export const getContacts = async () => {
-  console.log("Fetch contacts");
+import api from "./api";
+
+export const getContacts = (page, size) => {
+  return api.get(`/contacts?page=${page}&size=${size}`);
 };
 
-export const createContact = async (data) => {
-  console.log(data);
+// CREATE CONTACT
+export const createContact = (data) => {
+  return api.post("/contacts", data);
 };
 
-export const updateContact = async (id, data) => {
-  console.log(id, data);
+// UPDATE CONTACT
+export const updateContact = (id, data) => {
+  return api.put(`/contacts/${id}`, data);
 };
 
-export const deleteContact = async (id) => {
-  console.log(id);
+// DELETE CONTACT
+export const deleteContact = (id) => {
+  return api.delete(`/contacts/${id}`);
+};
+
+// EXPORT CONTACTS
+export const exportContacts = () => {
+  return api.get("/contacts/export", {
+    responseType: "blob",
+  });
+};
+
+// IMPORT CONTACTS
+export const importContacts = (file) => {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  return api.post("/contacts/import", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
 };

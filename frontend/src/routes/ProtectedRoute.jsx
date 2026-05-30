@@ -4,7 +4,9 @@ import { useAuth } from "../services/AuthContext";
 const ProtectedRoute = ({ children }) => {
   const { token } = useAuth();
 
-  if (!token) {
+  const isValid = token && token !== "undefined";
+
+  if (!isValid) {
     return <Navigate to="/login" replace />;
   }
 

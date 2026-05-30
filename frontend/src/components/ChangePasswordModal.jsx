@@ -1,7 +1,12 @@
 import { useState } from "react";
+import { changePassword } from "../services/authService";
+import { useNavigate } from "react-router-dom";
 import "../styles/Modal.css";
 
 const ChangePasswordModal = ({ closeModal }) => {
+
+  const navigate = useNavigate();
+
   const [passwords, setPasswords] = useState({
     currentPassword: "",
     newPassword: "",
@@ -15,10 +20,40 @@ const ChangePasswordModal = ({ closeModal }) => {
     });
   };
 
+const handleReset = async () => {
+
+  if (passwords.newPassword !== passwords.confirmPassword) {
+    alert("New Password and Confirm Password do not match");
+    return;
+  }
+
+  try {
+    await changePassword({
+      oldPassword: passwords.currentPassword,
+      newPassword: passwords.newPassword,
+    });
+
+    localStorage.removeItem("token");
+
+    alert("Password changed successfully");
+
+    closeModal();
+
+    navigate("/login");
+
+  } catch (error) {
+    console.log(error.response?.data);
+
+    alert(
+      error.response?.data?.message ||
+      "Failed to change password"
+    );
+  }
+};
+
   return (
     <div className="modal-overlay">
       <div className="modal-box">
-
 
         <input
           type="password"
@@ -45,8 +80,13 @@ const ChangePasswordModal = ({ closeModal }) => {
         />
 
         <div className="modal-buttons">
-          <button onClick={closeModal}>Cancel</button>
-          <button>Reset</button>
+          <button onClick={closeModal}>
+            Cancel
+          </button>
+
+          <button onClick={handleReset}>
+            Reset
+          </button>
         </div>
       </div>
     </div>

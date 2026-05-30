@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
+import { createContact, updateContact } from "../services/contactService";
 
-const ContactModal = ({ closeModal, selectedContact }) => {
+const ContactModal = ({ closeModal, selectedContact, refreshContacts }) => {
+
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -10,7 +12,12 @@ const ContactModal = ({ closeModal, selectedContact }) => {
 
   useEffect(() => {
     if (selectedContact) {
-      setFormData(selectedContact);
+      setFormData({
+        firstName: selectedContact.firstName || "",
+        lastName: selectedContact.lastName || "",
+        email: selectedContact.email || "",
+        phone: selectedContact.phone || "",
+});
     }
   }, [selectedContact]);
 
@@ -21,6 +28,25 @@ const ContactModal = ({ closeModal, selectedContact }) => {
     });
   };
 
+   const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      if (selectedContact) {
+        // UPDATE
+        await updateContact(selectedContact.id, formData);
+      } else {
+        // CREATE
+        await createContact(formData);
+      }
+
+      refreshContacts(); // reload list
+      closeModal();
+
+    } catch (error) {
+      console.log("Contact save error:", error.response?.data);
+    }
+  };
   return (
     <div className="modal-overlay">
       <div className="modal-box">
@@ -36,7 +62,7 @@ const ContactModal = ({ closeModal, selectedContact }) => {
           </p>
         </div>
 
-        <form className="modal-form" onSubmit={(e) => e.preventDefault()}>
+        <form className="modal-form" onSubmit={handleSubmit}>
           <div className="form-row">
             <div className="input-group">
               <label>First name</label>
