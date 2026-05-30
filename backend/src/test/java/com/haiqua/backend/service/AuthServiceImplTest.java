@@ -118,9 +118,8 @@ class AuthServiceImplTest {
         when(passwordEncoder.matches(dto.getPassword(), "encoded"))
                 .thenReturn(true);
 
-        when(jwtService.generateToken(dto.getEmail()))
+        when(jwtService.generateToken(user.getId(), dto.getEmail()))
                 .thenReturn("jwt-token");
-
         LoginResponseDto response = authService.loginUser(dto);
 
         assertEquals("jwt-token", response.getToken());

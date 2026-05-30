@@ -1,9 +1,6 @@
 package com.haiqua.backend.service;
 
-import com.haiqua.backend.dto.LoginRequestDto;
-import com.haiqua.backend.dto.LoginResponseDto;
-import com.haiqua.backend.dto.UserDto;
-import com.haiqua.backend.dto.UserRegistrationDto;
+import com.haiqua.backend.dto.*;
 
 public interface AuthService {
 
@@ -16,4 +13,8 @@ public interface AuthService {
     void resendOtp(String email);
 
     void resetPassword(String email, String newPassword);
+
+    void changePassword(ChangePasswordRequestDto dto);
+
+    UserProfileResponse getMyProfile();
 }

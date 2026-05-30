@@ -28,45 +28,67 @@ public class JwtService {
         return Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
 
-    // generate token
-    public String generateToken(String email) {
+    // GENERATE TOKEN
+    public String generateToken(Long userId, String email) {
+
         String token = Jwts.builder()
                 .setSubject(email)
+                .claim("userId", userId)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60)) // 1 hour
+                .setExpiration(
+                        new Date(System.currentTimeMillis() + 1000 * 60 * 60)
+                )
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
 
-        logger.debug("JWT token generated for email: {}", email);
+        logger.debug("JWT token generated for user: {}", email);
+
         return token;
     }
 
-    // extract email
-    public String extractEmail(String token) {
-        Claims claims = Jwts.parserBuilder()
+    // EXTRACT ALL CLAIMS
+    private Claims extractClaims(String token) {
+
+        return Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
-
-        return claims.getSubject();
     }
 
-    // validate token (includes expiry check)
+    // EXTRACT EMAIL
+    public String extractEmail(String token) {
+        return extractClaims(token).getSubject();
+    }
+
+    // EXTRACT USER ID
+    public Long extractUserId(String token) {
+
+        Integer userId = extractClaims(token)
+                .get("userId", Integer.class);
+
+        return userId.longValue();
+    }
+
+    // VALIDATE TOKEN
     public boolean validateToken(String token) {
+
         try {
+
             Jwts.parserBuilder()
                     .setSigningKey(getSigningKey())
                     .build()
-                    .parseClaimsJws(token); // automatically checks expiry
+                    .parseClaimsJws(token);
 
             return true;
 
         } catch (ExpiredJwtException e) {
+
             logger.warn("JWT token expired: {}", e.getMessage());
             return false;
 
         } catch (Exception e) {
+
             logger.warn("Invalid JWT token: {}", e.getMessage());
             return false;
         }

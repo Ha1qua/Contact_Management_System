@@ -78,5 +78,19 @@ public class AuthController {
         return ResponseEntity.ok("Password reset successfully");
     }
 
+    @PostMapping("/change-password")
+    public ResponseEntity<ApiResponse<String>> changePassword(
+            @RequestBody ChangePasswordRequestDto dto) {
 
+        authService.changePassword(dto);
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(true, "Password changed successfully", "SUCCESS")
+        );
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<UserProfileResponse> getMyProfile() {
+        return ResponseEntity.ok(authService.getMyProfile());
+    }
 }

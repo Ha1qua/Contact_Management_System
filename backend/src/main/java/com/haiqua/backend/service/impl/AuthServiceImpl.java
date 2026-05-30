@@ -1,9 +1,6 @@
 package com.haiqua.backend.service.impl;
 
-import com.haiqua.backend.dto.LoginRequestDto;
-import com.haiqua.backend.dto.LoginResponseDto;
-import com.haiqua.backend.dto.UserDto;
-import com.haiqua.backend.dto.UserRegistrationDto;
+import com.haiqua.backend.dto.*;
 import com.haiqua.backend.entity.User;
 import com.haiqua.backend.exception.EmailAlreadyExistsException;
 import com.haiqua.backend.exception.InvalidCredentialsException;
@@ -11,14 +8,19 @@ import com.haiqua.backend.exception.OtpException;
 import com.haiqua.backend.exception.UserNotFoundException;
 import com.haiqua.backend.mapper.UserMapper;
 import com.haiqua.backend.repository.UserRepository;
+import com.haiqua.backend.security.SecurityUtils;
 import com.haiqua.backend.service.AuthService;
 import com.haiqua.backend.service.EmailService;
 import com.haiqua.backend.service.JwtService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.haiqua.backend.dto.UserProfileResponse;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.time.LocalDateTime;
 
@@ -32,6 +34,10 @@ public class AuthServiceImpl implements AuthService {
     private final JwtService jwtService;
     private LocalDateTime otpExpiry;
     private final Logger logger = LoggerFactory.getLogger(AuthServiceImpl.class);
+
+    @Autowired
+    private SecurityUtils securityUtils;
+
 
     @Override
     public UserDto registerUser(UserRegistrationDto registrationDto){
@@ -135,7 +141,10 @@ public class AuthServiceImpl implements AuthService {
             throw new OtpException("User not verified. Please verify OTP first.");
         }
 
-        String token = jwtService.generateToken(user.getEmail());
+        String token = jwtService.generateToken(
+                user.getId(),
+                user.getEmail()
+        );
 
         logger.info("Login successful for email: {}", loginRequestDto.getEmail());
 
@@ -204,5 +213,36 @@ public class AuthServiceImpl implements AuthService {
         user.setOtpExpiry(null);
         user.setOtpAttempts(0);
         userRepository.save(user);
+    }
+
+    @Override
+    public void changePassword(ChangePasswordRequestDto dto) {
+
+        User user = securityUtils.getLoggedInUser();
+
+        // 1. check old password
+        if (!passwordEncoder.matches(dto.getOldPassword(), user.getPassword())) {
+            throw new RuntimeException("Old password is incorrect");
+        }
+
+        // 3. encode new password
+        user.setPassword(passwordEncoder.encode(dto.getNewPassword()));
+
+        userRepository.save(user);
+    }
+
+    @Override
+    public UserProfileResponse getMyProfile() {
+
+        User user = securityUtils.getLoggedInUser();
+
+        String email = user.getEmail();
+
+        String initials = email.substring(0, 1).toUpperCase();
+
+        return new UserProfileResponse(
+                email,
+                initials
+        );
     }
 }
