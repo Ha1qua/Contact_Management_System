@@ -37,10 +37,7 @@ public class ContactServiceImpl implements ContactService {
 
     private final ContactRepository contactRepository;
     private final UserRepository userRepository;
-
-    @Autowired
-    private SecurityUtils securityUtils;
-
+    private final SecurityUtils securityUtils;
 
 
     // ---------------- CREATE ----------------
