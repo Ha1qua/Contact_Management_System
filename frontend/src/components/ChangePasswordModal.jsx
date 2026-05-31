@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { changePassword } from "../services/authService";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import "../styles/Modal.css";
 
 const ChangePasswordModal = ({ closeModal }) => {
@@ -13,6 +14,8 @@ const ChangePasswordModal = ({ closeModal }) => {
     confirmPassword: "",
   });
 
+  const [errors, setErrors] = useState({});
+
   const handleChange = (e) => {
     setPasswords({
       ...passwords,
@@ -20,36 +23,67 @@ const ChangePasswordModal = ({ closeModal }) => {
     });
   };
 
-const handleReset = async () => {
+  // ✅ VALIDATION
+  const validate = () => {
+    let newErrors = {};
 
-  if (passwords.newPassword !== passwords.confirmPassword) {
-    alert("New Password and Confirm Password do not match");
-    return;
-  }
+    const passwordRegex =
+  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/;
 
-  try {
-    await changePassword({
-      oldPassword: passwords.currentPassword,
-      newPassword: passwords.newPassword,
-    });
+    if (!passwords.currentPassword) {
+      newErrors.currentPassword = "Current password is required";
+    }
 
-    localStorage.removeItem("token");
+    if (!passwords.newPassword) {
+      newErrors.newPassword = "New password is required";
+    } else if (passwords.newPassword.length < 6) {
+      newErrors.newPassword = "Password must be at least 6 characters";
+    }else if (!passwords.newPassword) {
+      newErrors.newPassword = "New password is required";
+    } else if (!passwordRegex.test(passwords.newPassword)) {
+      newErrors.newPassword =
+        "Password must include uppercase, lowercase, number & special character";
+    }
 
-    alert("Password changed successfully");
+    if (!passwords.confirmPassword) {
+      newErrors.confirmPassword = "Confirm password is required";
+    } else if (passwords.newPassword !== passwords.confirmPassword) {
+      newErrors.confirmPassword = "Passwords do not match";
+    }
 
-    closeModal();
+    setErrors(newErrors);
 
-    navigate("/login");
+    if (Object.keys(newErrors).length > 0) {
+      toast.error("Please fix form errors");
+      return false;
+    }
 
-  } catch (error) {
-    console.log(error.response?.data);
+    return true;
+  };
 
-    alert(
-      error.response?.data?.message ||
-      "Failed to change password"
-    );
-  }
-};
+  const handleReset = async () => {
+
+    if (!validate()) return;
+
+    try {
+      await changePassword({
+        oldPassword: passwords.currentPassword,
+        newPassword: passwords.newPassword,
+      });
+
+      localStorage.removeItem("token");
+
+      toast.success("Password changed successfully");
+
+      closeModal();
+      navigate("/login");
+
+    } catch (error) {
+      toast.error(
+        error?.response?.data?.message || "Failed to change password"
+      );
+    }
+  };
 
   return (
     <div className="modal-overlay">
@@ -62,6 +96,9 @@ const handleReset = async () => {
           value={passwords.currentPassword}
           onChange={handleChange}
         />
+        {errors.currentPassword && (
+          <small className="error">{errors.currentPassword}</small>
+        )}
 
         <input
           type="password"
@@ -70,6 +107,9 @@ const handleReset = async () => {
           value={passwords.newPassword}
           onChange={handleChange}
         />
+        {errors.newPassword && (
+          <small className="error">{errors.newPassword}</small>
+        )}
 
         <input
           type="password"
@@ -78,6 +118,9 @@ const handleReset = async () => {
           value={passwords.confirmPassword}
           onChange={handleChange}
         />
+        {errors.confirmPassword && (
+          <small className="error">{errors.confirmPassword}</small>
+        )}
 
         <div className="modal-buttons">
           <button onClick={closeModal}>

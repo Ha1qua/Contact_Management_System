@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { importContacts } from "../services/contactService";
 import ImportContacts from "../components/ImportContacts";
+import { toast } from "react-toastify";
 
 import SearchBar from "../components/SearchBar";
 import ContactCard from "../components/ContactCard";
@@ -39,7 +40,7 @@ const Contacts = () => {
     setTotalPages(res.data.data.totalPages);
 
   } catch (error) {
-    console.log(error);
+    toast.error("Failed to load contacts");
   }
 };
 
@@ -54,9 +55,12 @@ const Contacts = () => {
   const handleDelete = async (id) => {
     try {
       await deleteContact(id);
+       toast.success("Contact deleted successfully");
       fetchContacts(); // refresh list
     } catch (error) {
-      console.log("Delete error:", error.response?.data);
+      toast.error(
+      error?.response?.data?.message || "Failed to delete contact"
+    );
     }
   };
 
@@ -73,22 +77,13 @@ const Contacts = () => {
 
       document.body.appendChild(link);
       link.click();
+      toast.success("Contacts exported successfully");
     } catch (error) {
-      console.log("Export error:", error);
+      toast.error("Failed to export contacts");
     }
   };
 
-  const handleImport = async (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-
-  try {
-    await importContacts(file);
-    fetchContacts(); // refresh after import
-  } catch (error) {
-    console.log("Import error:", error);
-  }
-};
+ 
 
   return (
     <div className="contacts-container">

@@ -30,6 +30,7 @@ const Register = () => {
 
   const validateForm = () => {
     let newErrors = {};
+    const passwordRegex =/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/;
 
     if (!formData.email.includes("@")) {
       newErrors.email = "Enter a valid email";
@@ -37,6 +38,11 @@ const Register = () => {
 
     if (formData.password.length < 6) {
       newErrors.password = "Password must be at least 6 characters";
+    }else if (!formData.password) {
+      newErrors.password = "Password is required";
+    } else if (!passwordRegex.test(formData.password)) {
+      newErrors.password =
+        "Password must include uppercase, lowercase, number & special character";
     }
 
     if (formData.password !== formData.confirmPassword) {

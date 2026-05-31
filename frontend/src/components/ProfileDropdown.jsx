@@ -9,7 +9,7 @@ const ProfileDropdown = ({ profile }) => {
 
   const handleLogout = () => {
     localStorage.removeItem("token");
-    navigate("/");
+    navigate("/login");
   };
 
   return (
