@@ -12,20 +12,37 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0   # IMPORTANT for SonarCloud
 
+      # Setup Java for backend
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
           distribution: temurin
           java-version: 17
 
-      - name: Build project
+      # Setup Node for frontend
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      # FRONTEND
+      - name: Install Frontend
+        working-directory: ./frontend
+        run: npm install
+
+      - name: Build Frontend
+        working-directory: ./frontend
+        run: npm run build
+
+      # BACKEND (FIXED)
+      - name: Build Backend
+        working-directory: ./backend
         run: mvn clean verify
 
+      # SONAR CLOUD (IMPORTANT FIX)
       - name: SonarCloud Scan
-        run: |
-          mvn sonar:sonar \
-          -Dsonar.projectKey=Contact_Management_System \
-          -Dsonar.organization=Ha1qua \
-          -Dsonar.host.url=https://sonarcloud.io \
-          -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+        working-directory: ./backend
+        run: mvn sonar:sonar -Dsonar.login=${{ secrets.SONAR_TOKEN }}
