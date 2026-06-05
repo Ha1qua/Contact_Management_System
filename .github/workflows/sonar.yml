@@ -56,8 +56,4 @@ jobs:
       # ------------------------
       - name: SonarCloud Scan
         working-directory: ./backend
-        run: mvn sonar:sonar \
-          -Dsonar.host.url=https://sonarcloud.io \
-          -Dsonar.organization=Ha1qua \
-          -Dsonar.projectKey=Contact_Management_System \
-          -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+        run: mvn sonar:sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=Ha1qua -Dsonar.projectKey=Contact_Management_System -Dsonar.login=${{ secrets.SONAR_TOKEN }}
