@@ -1,0 +1,59 @@
+version: "3.9"
+
+services:
+
+  postgres:
+    image: postgres:latest
+    container_name: cms
+
+    environment:
+      POSTGRES_DB: cms
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1234
+
+    ports:
+      - "5432:5432"
+
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: cms-pgadmin
+
+    environment:
+      PGADMIN_DEFAULT_EMAIL: haiquamunir@gmail.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+
+    ports:
+      - "5050:80"
+
+    depends_on:
+      - postgres
+
+  backend:
+    build: ./backend
+    container_name: cms-backend
+
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/cms
+      DB_USERNAME: postgres
+      DB_PASSWORD: 1234
+      EMAIL_USERNAME: haiqua073@gmail.com
+      EMAIL_PASSWORD: "ljev qrha akeb idod"
+      JWT_SECRET: mySuperStrongJwtSecretKey123456789
+
+    ports:
+      - "8080:8080"
+
+    depends_on:
+      - postgres
+
+  frontend:
+    build: ./frontend
+    container_name: cms-frontend
+
+    ports:
+      - "5173:5173"
+
+    depends_on:
+      - backend
+
