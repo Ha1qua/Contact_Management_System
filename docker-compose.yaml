@@ -38,7 +38,7 @@ services:
       DB_USERNAME: postgres
       DB_PASSWORD: 1234
       EMAIL_USERNAME: haiqua073@gmail.com
-      EMAIL_PASSWORD: "ljev qrha akeb idod"
+      EMAIL_PASSWORD: "acnz cfvm lugb idbe"
       JWT_SECRET: mySuperStrongJwtSecretKey123456789
 
     ports:
@@ -52,7 +52,7 @@ services:
     container_name: cms-frontend
 
     ports:
-      - "5173:5173"
+      - "5173:80"
 
     depends_on:
       - backend
