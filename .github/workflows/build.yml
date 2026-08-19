@@ -1,4 +1,4 @@
-name: CMS CI
+name: BUILD
 on:
   push:
     branches:
@@ -27,6 +27,7 @@ jobs:
       - name: Build Frontend
         working-directory: ./frontend
         run: npm run build
+        
   backend-build:
     runs-on: ubuntu-latest
 
