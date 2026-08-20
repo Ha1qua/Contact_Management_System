@@ -1,20 +1,20 @@
-# name: SonarCloud Scan
+name: Debug
 
-# on:
-#   push:
-#     branches: [ "main" ]
-#   pull_request:
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
 
-# jobs:
-#   build:
-#     runs-on: ubuntu-latest
+jobs:
+  build:
+    runs-on: ubuntu-latest
 
-#     steps:
-#       # Checkout code
-#       - name: Checkout code
-#         uses: actions/checkout@v3
-#         with:
-#           fetch-depth: 0   # important for SonarCloud
+    steps:
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
+          
 
 #       # ------------------------
 #       # Setup Java (Backend)
