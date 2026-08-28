@@ -1,15 +1,23 @@
 name: BUILD
+
 on:
   push:
     branches:
       - main
+
   pull_request:
+    branches:
+      - main
+
+  merge_group:
+    types:
+      - checks_requested
+
 jobs:
   frontend-build:
     runs-on: ubuntu-latest
 
     steps:
-
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -27,12 +35,11 @@ jobs:
       - name: Build Frontend
         working-directory: ./frontend
         run: npm run build
-        
+
   backend-build:
     runs-on: ubuntu-latest
 
     steps:
-
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -48,8 +55,23 @@ jobs:
 
       - name: Build Backend
         working-directory: ./backend
-        run: ./mvnw clean package -DskipTestst
+        run: ./mvnw clean package -DskipTests
 
-      - name: Build Backend
-        working-directory: ./backend
-        run: mvn clean package -DskipTests
+  dockerimage-build:
+    needs:
+      - frontend-build
+      - backend-build
+
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build Frontend Docker Image
+        run: docker build -t frontend ./frontend
+
+      - name: Build Backend Docker Image
+        run: docker build -t backend ./backend
