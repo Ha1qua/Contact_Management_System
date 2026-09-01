@@ -4,14 +4,11 @@ on:
   pull_request:
     branches:
       - main
-  push:
-    branches:
-      - main
 
 jobs:
+
   frontend-build:
-    name: Frontend Build
-    if: github.event_name == 'pull_request'
+    name: Frontend Build and Docker Image
     runs-on: ubuntu-latest
 
     steps:
@@ -33,9 +30,28 @@ jobs:
         working-directory: ./frontend
         run: npm run build
 
+      - name: Build frontend Docker image
+        run: |
+          docker build \
+            -t ha1qua/contact-management-frontend:pr-${{ github.event.pull_request.number }} \
+            ./frontend
+
+      - name: Save frontend Docker image
+        run: |
+          docker save \
+            ha1qua/contact-management-frontend:pr-${{ github.event.pull_request.number }} \
+            -o frontend-image.tar
+
+      - name: Upload frontend Docker image
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-docker-image
+          path: frontend-image.tar
+          retention-days: 1
+
+
   backend-build:
-    name: Backend Build
-    if: github.event_name == 'pull_request'
+    name: Backend Build and Docker Image
     runs-on: ubuntu-latest
 
     steps:
@@ -56,14 +72,65 @@ jobs:
         working-directory: ./backend
         run: ./mvnw clean package -DskipTests
 
-  docker-build-push:
-    name: Build and Push Docker Images
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      - name: Build backend Docker image
+        working-directory: ./backend
+        run: |
+          docker build \
+            -t ha1qua/contact-management-backend:pr-${{ github.event.pull_request.number }} \
+            .
+
+      - name: Save backend Docker image
+        run: |
+          docker save \
+            ha1qua/contact-management-backend:pr-${{ github.event.pull_request.number }} \
+            -o backend-image.tar
+
+      - name: Upload backend Docker image
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-docker-image
+          path: backend-image.tar
+          retention-days: 1
+
+
+  pr-check:
+    name: PR Check
+    needs:
+      - frontend-build
+      - backend-build
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - name: Docker builds passed
+        run: echo "Frontend and Backend Docker images built successfully"
+
+
+  push-images:
+    name: Push Docker Images
+    needs:
+      - frontend-build
+      - backend-build
+      - pr-check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download frontend Docker image
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-docker-image
+
+      - name: Download backend Docker image
+        uses: actions/download-artifact@v4
+        with:
+          name: backend-docker-image
+
+      - name: Load frontend Docker image
+        run: |
+          docker load -i frontend-image.tar
+
+      - name: Load backend Docker image
+        run: |
+          docker load -i backend-image.tar
 
       - name: Generate image version
         run: |
@@ -76,26 +143,32 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build frontend Docker image
+      - name: Tag frontend image
         run: |
-          docker build \
-            -t ha1qua/contact-management-frontend:v${VERSION} \
-            -t ha1qua/contact-management-frontend:latest \
-            ./frontend
+          docker tag \
+            ha1qua/contact-management-frontend:pr-${{ github.event.pull_request.number }} \
+            ha1qua/contact-management-frontend:v${VERSION}
 
-      - name: Build backend Docker image
+          docker tag \
+            ha1qua/contact-management-frontend:pr-${{ github.event.pull_request.number }} \
+            ha1qua/contact-management-frontend:latest
+
+      - name: Tag backend image
         run: |
-          docker build \
-            -t ha1qua/contact-management-backend:v${VERSION} \
-            -t ha1qua/contact-management-backend:latest \
-            ./backend
+          docker tag \
+            ha1qua/contact-management-backend:pr-${{ github.event.pull_request.number }} \
+            ha1qua/contact-management-backend:v${VERSION}
 
-      - name: Push frontend Docker images
+          docker tag \
+            ha1qua/contact-management-backend:pr-${{ github.event.pull_request.number }} \
+            ha1qua/contact-management-backend:latest
+
+      - name: Push frontend images
         run: |
           docker push ha1qua/contact-management-frontend:v${VERSION}
           docker push ha1qua/contact-management-frontend:latest
 
-      - name: Push backend Docker images
+      - name: Push backend images
         run: |
           docker push ha1qua/contact-management-backend:v${VERSION}
           docker push ha1qua/contact-management-backend:latest
