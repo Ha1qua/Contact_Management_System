@@ -1,20 +1,17 @@
-name: BUILD
+name: CMS CI/CD
 
 on:
+  pull_request:
+    branches:
+      - main
   push:
     branches:
       - main
 
-  pull_request:
-    branches:
-      - main
-
-  merge_group:
-    types:
-      - checks_requested
-
 jobs:
   frontend-build:
+    name: Frontend Build
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
 
     steps:
@@ -28,15 +25,17 @@ jobs:
           cache: npm
           cache-dependency-path: frontend/package-lock.json
 
-      - name: Install Frontend Dependencies
+      - name: Install frontend dependencies
         working-directory: ./frontend
         run: npm ci
 
-      - name: Build Frontend
+      - name: Build frontend
         working-directory: ./frontend
         run: npm run build
 
   backend-build:
+    name: Backend Build
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
 
     steps:
@@ -49,29 +48,54 @@ jobs:
           distribution: temurin
           java-version: 21
 
-      - name: Run Backend Tests
+      - name: Test backend
         working-directory: ./backend
         run: ./mvnw test
 
-      - name: Build Backend
+      - name: Build backend
         working-directory: ./backend
         run: ./mvnw clean package -DskipTests
 
-  dockerimage-build:
-    needs:
-      - frontend-build
-      - backend-build
-
+  docker-build-push:
+    name: Build and Push Docker Images
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Build Frontend Docker Image
-        run: docker build -t frontend ./frontend
+      - name: Generate image version
+        run: |
+          VERSION="1.0.${{ github.run_number }}"
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
 
-      - name: Build Backend Docker Image
-        run: docker build -t backend ./backend
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build frontend Docker image
+        run: |
+          docker build \
+            -t ha1qua/contact-management-frontend:v${VERSION} \
+            -t ha1qua/contact-management-frontend:latest \
+            ./frontend
+
+      - name: Build backend Docker image
+        run: |
+          docker build \
+            -t ha1qua/contact-management-backend:v${VERSION} \
+            -t ha1qua/contact-management-backend:latest \
+            ./backend
+
+      - name: Push frontend Docker images
+        run: |
+          docker push ha1qua/contact-management-frontend:v${VERSION}
+          docker push ha1qua/contact-management-frontend:latest
+
+      - name: Push backend Docker images
+        run: |
+          docker push ha1qua/contact-management-backend:v${VERSION}
+          docker push ha1qua/contact-management-backend:latest
