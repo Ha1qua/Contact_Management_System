@@ -1,69 +1,17 @@
-```yaml
 name: CMS CI/CD
 
 on:
   pull_request:
     branches:
       - main
-
   push:
     branches:
       - main
 
 jobs:
-
-  frontend-ci:
-    name: Frontend CI
+  frontend-build:
+    name: Frontend Build
     if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
-          cache-dependency-path: frontend/package-lock.json
-
-      - name: Install dependencies
-        working-directory: ./frontend
-        run: npm ci
-
-      - name: Build frontend
-        working-directory: ./frontend
-        run: npm run build
-
-
-  backend-ci:
-    name: Backend CI
-    if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: 21
-
-      - name: Test backend
-        working-directory: ./backend
-        run: ./mvnw test
-
-      - name: Build backend
-        working-directory: ./backend
-        run: ./mvnw clean package -DskipTests
-
-
-  docker-build-push:
-    name: Build and Push Docker Images
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
 
     steps:
@@ -85,6 +33,15 @@ jobs:
         working-directory: ./frontend
         run: npm run build
 
+  backend-build:
+    name: Backend Build
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
@@ -98,6 +55,15 @@ jobs:
       - name: Build backend
         working-directory: ./backend
         run: ./mvnw clean package -DskipTests
+
+  docker-build-push:
+    name: Build and Push Docker Images
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Generate image version
         run: |
@@ -133,13 +99,3 @@ jobs:
         run: |
           docker push ha1qua/contact-management-backend:v${VERSION}
           docker push ha1qua/contact-management-backend:latest
-
-      - name: Show Docker images
-        run: |
-          echo "Frontend:"
-          echo "ha1qua/contact-management-frontend:v${VERSION}"
-          echo "ha1qua/contact-management-frontend:latest"
-
-          echo "Backend:"
-          echo "ha1qua/contact-management-backend:v${VERSION}"
-          echo "ha1qua/contact-management-backend:latest"
