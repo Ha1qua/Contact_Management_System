@@ -128,7 +128,7 @@ jobs:
             const { data } = await github.rest.actions.listWorkflowRuns({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              workflow_id: "ci-cd.yml",
+              workflow_id: "build.yml",
               event: "pull_request",
               status: "completed",
               per_page: 100
