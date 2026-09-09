@@ -224,7 +224,7 @@ jobs:
 
   frontend-build:
     name: Frontend Build and Docker Image
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     steps:
       - name: Checkout code
@@ -267,7 +267,7 @@ jobs:
 
   backend-build:
     name: Backend Build and Docker Image
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     steps:
       - name: Checkout code
@@ -317,7 +317,7 @@ jobs:
     # ONLY run when code has been pushed to main
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     steps:
 
@@ -364,3 +364,4 @@ jobs:
       - name: Push backend image
         run: |
           docker push ha1qua/contact-management-backend:latest
+ 
