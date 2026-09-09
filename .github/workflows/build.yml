@@ -220,6 +220,9 @@ on:
     branches:
       - main
 
+env:
+  DOCKER_HOST: tcp://docker-dind:2375
+
 jobs:
 
   frontend-build:
